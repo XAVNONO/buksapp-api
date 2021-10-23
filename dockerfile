@@ -1,13 +1,13 @@
-FROM node:14
+FROM node:12-alpine
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-COPY package*.json ./
-
-RUN npm install
+ENV NODE_ENV=production
 
 COPY . .
 
-EXPOSE 9000
+RUN npm i --only=production
 
-CMD [ "node", "server.js" ]
+EXPOSE 4000
+
+ENTRYPOINT ["npm", "start"]
