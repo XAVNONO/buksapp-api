@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bukscore-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bukscore-backend
+  template:
+    metadata:
+      labels:
+        app: bukscore-backend
+    spec:
+      containers:
+      - name: bukscore-backend
+        image: bukunmi00/bukscore-backend
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 4000
+
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: bukscore-backend
+spec:
+  type: NodePort
+  selector:
+    app: bukscore-backend
+  ports:
+  - port: 4000
+    targetPort: 4000
+    protocol: TCP
+    nodePort: 32767
