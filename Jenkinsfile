@@ -1,12 +1,12 @@
 pipeline {
-    agent any
-    environment {
-        PROJECT_ID = "jenkins-project-328308"
+    agent any
+    environment {
+        PROJECT_ID = "enkins-project-328308"
         CLUSTER_NAME = "k8s-cluster"
         LOCATION = "us-central1-c"
-        CREDENTIALS_ID = 'jenkins-project'
+        CREDENTIALS_ID = 'enkins-project'
     }
-    stages {
+    stages {
         stage('pull from github repo'){
             steps{
                 git "https://github.com/Bukunmitanimonure/buksapp-api.git"
@@ -34,4 +34,3 @@ pipeline {
         }
     }
 }
-
