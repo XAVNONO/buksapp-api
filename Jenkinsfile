@@ -1,36 +1,35 @@
 pipeline {
     agent any
     environment {
-        PROJECT_ID = "enkins-project-328308"
+        PROJECT_ID = "cloud-school-project-330005"
         CLUSTER_NAME = "k8s-cluster"
         LOCATION = "us-central1-c"
-        CREDENTIALS_ID = 'enkins-project'
+        CREDENTIALS_ID = 'cloud-school-project'
     }
     stages {
-        stage('pull from github repo'){
-            steps{
-                git "https://github.com/Bukunmitanimonure/buksapp-api.git"
-            }
-        }
-        stage('build docker image'){
-            steps{
-                sh "docker build -t bukunmi00/bukscore-backend:${env.BUILD_ID} ."                
-            }
-        }
-        stage('push docker image to dockerhub'){
-            steps{
-                withCredentials([string(credentialsId: 'DOCKER_PASS', variable: 'docker_pass')]) {
-                    sh "docker login -u bukunmi00 -p ${docker_pass}"
-                }
-                sh "docker push bukunmi00/bukscore-backend:${env.BUILD_ID}"
-            }
-            
-        }
-        stage('deploy on k8 cluster'){
-            steps{
-                sh "sed -i 's/tagversion/${env.BUILD_ID}/g' backend-k8.yaml"
-                step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'backend-k8.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])   
-            }
-        }
-    }
+        stage('Scm Checkout') {
+            steps {
+                git "https://github.com/Japhetism/buks-app-backend"
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t japhetism/gcp-buks-backend:${env.BUILD_ID} ."  
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([string(credentialsId: 'DOCKER_HUB_CREDENTIALS', variable: 'dockerHubCredentials')]) {
+                    sh "docker login -u japhetism -p ${dockerHubCredentials}"
+                }
+                sh "docker push japhetism/gcp-buks-backend:${env.BUILD_ID}"
+            }
+        }
+        stage('Deploy to GKE') {
+            steps{
+                sh "sed -i 's/tagversion/${env.BUILD_ID}/g' deployment.yml"
+                step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'deployment.yml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])
+            }
+        }
+    }
 }
