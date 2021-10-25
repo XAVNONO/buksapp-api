@@ -14,7 +14,7 @@ pipeline {
         }
         stage('build docker image'){
             steps{
-                sh "docker build -t bukunmi00/bukscore-backend:${env.BUILD_ID} ."                
+                sh "docker build -t bukunmi00/buksapp-backend:${env.BUILD_ID} ."                
             }
         }
         stage('push docker image to dockerhub'){
@@ -22,14 +22,14 @@ pipeline {
                 withCredentials([string(credentialsId: 'DOCKER_PASS', variable: 'docker_pass')]) {
                     sh "docker login -u bukunmi00 -p ${docker_pass}"
                 }
-                sh "docker push bukunmi00/bukscore-backend:${env.BUILD_ID}"
+                sh "docker push bukunmi00/buksapp-backend:${env.BUILD_ID}"
             }
             
         }
         stage('deploy on k8 cluster'){
             steps{
                 sh "sed -i 's/tagversion/${env.BUILD_ID}/g' backend-k8.yaml"
-                step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'backend-k8.yaml', credentialsId: env.CREDENTIALS_ID ])   
+                step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'backend-k8.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])   
             }
         }
     }
